@@ -8,12 +8,20 @@ import (
 	"google.golang.org/grpc"
 	"net/http"
 	"picket/src/config"
+	answersheet_repository "picket/src/features/answersheet/repository"
+	answersheet_transport "picket/src/features/answersheet/transport"
+	answersheet_usecase "picket/src/features/answersheet/usecase"
+	answersheetpb "picket/src/pb/answer_sheet"
 )
 
 type handler = func(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error
 
 func RouteGrpc(ctx context.Context, s *grpc.Server, config config.IConfig) {
+	answersheetRepository := answersheet_repository.New(config.GetMongo())
+	answersheetUsecase := answersheet_usecase.New(answersheetRepository)
+	answerSheetController := answersheet_transport.New(ctx, answersheetUsecase)
 
+	answersheetpb.RegisterAnswerSheetServiceServer(s, answerSheetController)
 }
 
 func RouteGw(ctx context.Context, gw *runtime.ServeMux, conn *grpc.ClientConn) {

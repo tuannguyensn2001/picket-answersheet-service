@@ -25,6 +25,7 @@ type structure struct {
 	Database struct {
 		Mysql    string `mapstructure:"mysql"`
 		Postgres string `mapstructure:"postgres"`
+		Mongo    string `mapstructure:"mongo"`
 	} `mapstructure:"database"`
 }
 

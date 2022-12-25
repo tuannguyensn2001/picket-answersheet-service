@@ -2,6 +2,7 @@ package config
 
 import (
 	"github.com/go-redis/redis/v9"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +16,7 @@ type IConfig interface {
 	GetDB() *gorm.DB
 	GetSecretKey() string
 	GetRedis() *redis.Client
+	GetMongo() *mongo.Client
 }
 
 func (c config) GetGoogleClientId() string {
@@ -35,4 +37,8 @@ func (c config) GetSecretKey() string {
 
 func (c config) GetRedis() *redis.Client {
 	return c.redis
+}
+
+func (c config) GetMongo() *mongo.Client {
+	return c.mongo
 }

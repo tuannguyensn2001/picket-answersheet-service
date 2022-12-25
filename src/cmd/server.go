@@ -9,6 +9,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
 	"github.com/spf13/cobra"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -41,10 +42,10 @@ func server(config config.IConfig) *cobra.Command {
 			otel.SetTracerProvider(tp)
 
 			var wg sync.WaitGroup
-			wg.Add(2)
+			wg.Add(1)
 			go runGrpc(ctx, config, &wg)
 
-			go runGateway(ctx, config, &wg)
+			//go runGateway(ctx, config, &wg)
 			wg.Wait()
 			zap.S().Info("shutdown application")
 		},
@@ -56,7 +57,9 @@ func runGrpc(ctx context.Context, config config.IConfig, wg *sync.WaitGroup) {
 	server := grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 		grpc_zap.UnaryServerInterceptor(zap.L()),
 		grpc_recovery.UnaryServerInterceptor([]grpc_recovery.Option{grpc_recovery.WithRecoveryHandlerContext(middlewares.HandleGrpcError)}...),
+		otelgrpc.UnaryServerInterceptor(),
 	)))
+
 	reflection.Register(server)
 
 	lis, err := net.Listen("tcp", config.GetGrpcAddress())

@@ -22,4 +22,5 @@ var bind map[string]string = map[string]string{
 	"CLIENT_URL":                  "client.url",
 	"DATABASE_MYSQL":              "database.mysql",
 	"DATABASE_POSTGRES":           "database.postgres",
+	"DATABASE_MONGO":              "database.mongo",
 }

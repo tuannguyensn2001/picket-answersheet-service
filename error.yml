@@ -65,4 +65,9 @@ answersheet:
         message: user doing test
         statusCode: 403
         grpcCode: 403
+    userNotDoing:
+        code: 14
+        message: user not doing test
+        statusCode: 400
+        grpcCode: 400
     

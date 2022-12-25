@@ -3,9 +3,9 @@ package config
 import (
 	"context"
 	"github.com/go-redis/redis/v9"
-	"gorm.io/driver/postgres"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"log"
 )
 
@@ -19,6 +19,7 @@ type config struct {
 	db                 *gorm.DB
 	secretKey          string
 	redis              *redis.Client
+	mongo              *mongo.Client
 }
 
 func GetConfig() config {
@@ -33,12 +34,6 @@ func GetConfig() config {
 		secretKey:          structure.App.SecretKey,
 	}
 
-	db, err := gorm.Open(postgres.Open(structure.Database.Postgres), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
-	if err != nil {
-		log.Fatalln(err)
-	}
 	rd := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
@@ -47,8 +42,13 @@ func GetConfig() config {
 		log.Println("redis ping error", status.Err())
 	}
 
-	result.db = db
+	m, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(structure.Database.Mongo))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	result.redis = rd
+	result.mongo = m
 
 	return result
 }
