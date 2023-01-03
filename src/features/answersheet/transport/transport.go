@@ -8,10 +8,12 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	answersheet_struct "picket/src/features/answersheet/struct"
 	errpkg "picket/src/packages/err"
 	retrypkg "picket/src/packages/retry"
 	answersheetpb "picket/src/pb/answer_sheet"
+	"time"
 )
 
 type IUsecase interface {
@@ -20,6 +22,7 @@ type IUsecase interface {
 	NotifyJobFail(ctx context.Context, jobId int, errFail error) error
 	PushToDeadLetterQueue(ctx context.Context, value []byte) error
 	NotifyJobSuccess(ctx context.Context, jobId int) error
+	GetLatestStartTime(ctx context.Context, testId int, userId int) (*time.Time, error)
 }
 
 type transport struct {
@@ -30,7 +33,25 @@ type transport struct {
 func New(ctx context.Context, usecase IUsecase) *transport {
 	t := &transport{usecase: usecase}
 	go t.StartTest(ctx)
+	go t.AnswerTest(ctx)
 	return t
+}
+
+func (t *transport) AnswerTest(ctx context.Context) {
+	r := kafka.NewReader(kafka.ReaderConfig{
+		Brokers: []string{"localhost:9092"},
+		Topic:   "answer-test",
+		GroupID: "consumer-answersheet-service-answer-test",
+	})
+
+	for {
+		m, err := r.ReadMessage(ctx)
+		if err != nil {
+			zap.S().Error(err)
+			continue
+		}
+		zap.S().Info(string(m.Value), m.Partition)
+	}
 }
 
 func (t *transport) StartTest(ctx context.Context) {
@@ -95,4 +116,18 @@ func (t *transport) CheckUserDoingTest(ctx context.Context, request *answersheet
 		Check:   check,
 		Message: "success",
 	}, nil
+}
+
+func (t *transport) GetLatestStartTime(ctx context.Context, request *answersheetpb.GetLatestStartTimeRequest) (*answersheetpb.GetLatestStartTimeResponse, error) {
+	result, err := t.usecase.GetLatestStartTime(ctx, int(request.TestId), int(request.UserId))
+	if err != nil {
+		panic(err)
+	}
+
+	resp := answersheetpb.GetLatestStartTimeResponse{
+		Message: "success",
+		Data:    timestamppb.New(*result),
+	}
+
+	return &resp, nil
 }

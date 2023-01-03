@@ -1,4 +1,14 @@
 general:
+    notFound:
+        code: 11
+        message: not found
+        statusCode: 404
+        grpcCode: 404
+    unauthorized:
+        code: 3
+        message: unauthorized
+        statusCode: 3
+        grpcCode: 13
     internal:
         code: 5
         message: internal server error
@@ -13,16 +23,6 @@ general:
         code: 2
         message: Data not valid
         statusCode: 400
-        grpcCode: 13
-    notFound:
-        code: 11
-        message: not found
-        statusCode: 404
-        grpcCode: 404
-    unauthorized:
-        code: 3
-        message: unauthorized
-        statusCode: 3
         grpcCode: 13
     
 auth:
@@ -68,6 +68,16 @@ answersheet:
     userNotDoing:
         code: 14
         message: user not doing test
+        statusCode: 400
+        grpcCode: 400
+    notFoundUserStart:
+        code: 15
+        message: not found user start
+        statusCode: 400
+        grpcCode: 400
+    userStarted:
+        code: 16
+        message: user started test
         statusCode: 400
         grpcCode: 400
     

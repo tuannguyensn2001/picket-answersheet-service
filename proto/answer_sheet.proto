@@ -44,6 +44,19 @@ message CheckUserDoingTestResponse {
   string message = 2;
 }
 
+message GetLatestStartTimeRequest {
+  int64 test_id = 1;
+  int64 user_id = 2;
+}
+
+message GetLatestStartTimeResponse {
+  string message = 1;
+  google.protobuf.Timestamp data = 2;
+}
+
+
+
+
 service AnswerSheetService {
   rpc StartDoTest(StartDoTestRequest) returns(StartDoTestResponse) {
     option(google.api.http) = {
@@ -52,4 +65,5 @@ service AnswerSheetService {
     };
   }
   rpc CheckUserDoingTest(CheckUserDoingTestRequest) returns(CheckUserDoingTestResponse);
+  rpc GetLatestStartTime(GetLatestStartTimeRequest) returns(GetLatestStartTimeResponse);
 }

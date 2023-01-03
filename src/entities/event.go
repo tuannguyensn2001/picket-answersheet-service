@@ -10,6 +10,7 @@ type Event struct {
 	UserId    int                `bson:"user_id,omitempty"`
 	TestId    int                `bson:"test_id,omitempty"`
 	Event     string             `bson:"event,omitempty"`
+	Session   string             `bson:"session,omitempty"`
 	CreatedAt *time.Time         `bson:"created_at,omitempty"`
 	UpdatedAt *time.Time         `bson:"updated_at,omitempty"`
 }
