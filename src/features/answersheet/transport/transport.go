@@ -23,6 +23,7 @@ type IUsecase interface {
 	PushToDeadLetterQueue(ctx context.Context, value []byte) error
 	NotifyJobSuccess(ctx context.Context, jobId int) error
 	GetLatestStartTime(ctx context.Context, testId int, userId int) (*time.Time, error)
+	UserAnswer(ctx context.Context, input answersheet_struct.UserAnswerInput) error
 }
 
 type transport struct {
@@ -38,10 +39,12 @@ func New(ctx context.Context, usecase IUsecase) *transport {
 }
 
 func (t *transport) AnswerTest(ctx context.Context) {
+	l := zap.S()
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{"localhost:9092"},
 		Topic:   "answer-test",
 		GroupID: "consumer-answersheet-service-answer-test",
+		Logger:  kafka.LoggerFunc(l.Debugw),
 	})
 
 	for {
@@ -50,8 +53,39 @@ func (t *transport) AnswerTest(ctx context.Context) {
 			zap.S().Error(err)
 			continue
 		}
-		zap.S().Info(string(m.Value), m.Partition)
+		var input answersheet_struct.UserAnswerInput
+		err = json.NewDecoder(bytes.NewBuffer(m.Value)).Decode(&input)
+		if err != nil || input.JobId == 0 {
+			err := t.usecase.PushToDeadLetterQueue(ctx, m.Value)
+			if err == nil {
+				r.CommitMessages(ctx, m)
+			}
+			zap.S().Error(err)
+			continue
+		}
+
+		err = retrypkg.Do(func() error {
+			return t.usecase.UserAnswer(ctx, input)
+		}, retrypkg.Options{Attempt: 10})
+		if err != nil {
+			err := t.usecase.NotifyJobFail(ctx, input.JobId, err)
+			if err == nil {
+				r.CommitMessages(ctx, m)
+			}
+			zap.S().Error(err)
+			continue
+		}
+
+		go t.usecase.NotifyJobSuccess(ctx, input.JobId)
+
+		if err := r.CommitMessages(ctx, m); err != nil {
+			zap.S().Error(err)
+		}
 	}
+	if err := r.Close(); err != nil {
+		zap.S().Error(err)
+	}
+
 }
 
 func (t *transport) StartTest(ctx context.Context) {
@@ -59,6 +93,7 @@ func (t *transport) StartTest(ctx context.Context) {
 		Brokers: []string{"localhost:9092"},
 		Topic:   "start-test",
 		GroupID: "consumer-answersheet-service-1",
+		Logger:  kafka.LoggerFunc(zap.S().Debugw),
 	})
 
 	zap.S().Info("listen kafka")

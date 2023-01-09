@@ -64,7 +64,8 @@ func (r *repository) GetLatestStartEvent(ctx context.Context, userId int, testId
 			},
 		},
 	}
-	resp := r.mongo.Database("picket").Collection("events").FindOne(ctx, filter)
+	opts := options.FindOne().SetSort(bson.D{{"_id", -1}})
+	resp := r.mongo.Database("picket").Collection("events").FindOne(ctx, filter, opts)
 	if resp.Err() != nil {
 		return nil, resp.Err()
 	}

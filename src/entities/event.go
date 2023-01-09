@@ -6,17 +6,20 @@ import (
 )
 
 type Event struct {
-	Id        primitive.ObjectID `bson:"_id"`
-	UserId    int                `bson:"user_id,omitempty"`
-	TestId    int                `bson:"test_id,omitempty"`
-	Event     string             `bson:"event,omitempty"`
-	Session   string             `bson:"session,omitempty"`
-	CreatedAt *time.Time         `bson:"created_at,omitempty"`
-	UpdatedAt *time.Time         `bson:"updated_at,omitempty"`
+	Id             primitive.ObjectID `bson:"_id"`
+	UserId         int                `bson:"user_id,omitempty"`
+	TestId         int                `bson:"test_id,omitempty"`
+	Event          string             `bson:"event,omitempty"`
+	Session        string             `bson:"session,omitempty"`
+	Answer         string             `bson:"answer,omitempty"`
+	PreviousAnswer string             `bson:"previous_answer,omitempty"`
+	CreatedAt      *time.Time         `bson:"created_at,omitempty"`
+	UpdatedAt      *time.Time         `bson:"updated_at,omitempty"`
 }
 
 const (
-	START = "START"
-	DOING = "DOING"
-	END   = "END"
+	START  = "START"
+	DOING  = "DOING"
+	END    = "END"
+	ANSWER = "ANSWER"
 )
