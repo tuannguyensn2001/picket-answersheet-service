@@ -33,3 +33,5 @@ migrate:
 migrate-down:
 	@go run src/server/main.go migrate-down
 
+server:
+	@go run src/server/main.go

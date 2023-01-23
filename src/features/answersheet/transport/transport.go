@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"picket/src/entities"
 	answersheet_struct "picket/src/features/answersheet/struct"
 	errpkg "picket/src/packages/err"
 	retrypkg "picket/src/packages/retry"
@@ -24,6 +25,7 @@ type IUsecase interface {
 	NotifyJobSuccess(ctx context.Context, jobId int) error
 	GetLatestStartTime(ctx context.Context, testId int, userId int) (*time.Time, error)
 	UserAnswer(ctx context.Context, input answersheet_struct.UserAnswerInput) error
+	GetCurrentTest(ctx context.Context, testId int, userId int) ([]entities.Event, error)
 }
 
 type transport struct {
@@ -164,5 +166,24 @@ func (t *transport) GetLatestStartTime(ctx context.Context, request *answersheet
 		Data:    timestamppb.New(*result),
 	}
 
+	return &resp, nil
+}
+
+func (t *transport) GetCurrentTest(ctx context.Context, request *answersheetpb.GetCurrentTestRequest) (*answersheetpb.GetCurrentTestResponse, error) {
+	data, err := t.usecase.GetCurrentTest(ctx, int(request.TestId), int(request.UserId))
+	if err != nil {
+		panic(err)
+	}
+	list := make([]*answersheetpb.Answer, len(data))
+	for index, item := range data {
+		list[index] = &answersheetpb.Answer{
+			QuestionId: int64(item.QuestionId),
+			Answer:     item.Answer,
+		}
+	}
+	resp := answersheetpb.GetCurrentTestResponse{
+		Message: "success",
+		Data:    list,
+	}
 	return &resp, nil
 }

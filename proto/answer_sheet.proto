@@ -54,7 +54,21 @@ message GetLatestStartTimeResponse {
   google.protobuf.Timestamp data = 2;
 }
 
+message GetCurrentTestRequest {
+  int64 user_id = 1;
+  int64 test_id = 2;
+}
 
+
+message Answer {
+  int64 question_id = 1;
+  string answer = 2;
+}
+
+message GetCurrentTestResponse {
+  string message = 1;
+  repeated Answer data = 2;
+}
 
 
 service AnswerSheetService {
@@ -66,4 +80,5 @@ service AnswerSheetService {
   }
   rpc CheckUserDoingTest(CheckUserDoingTestRequest) returns(CheckUserDoingTestResponse);
   rpc GetLatestStartTime(GetLatestStartTimeRequest) returns(GetLatestStartTimeResponse);
+  rpc GetCurrentTest(GetCurrentTestRequest) returns(GetCurrentTestResponse);
 }

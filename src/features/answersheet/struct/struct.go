@@ -23,5 +23,6 @@ type UserAnswerInput struct {
 		CreatedAt      *time.Time `json:"created_at"`
 		UpdatedAt      *time.Time `json:"updated_at"`
 		PreviousAnswer string     `json:"previous_answer"`
+		QuestionId     int        `json:"question_id"`
 	} `json:"payload"`
 }

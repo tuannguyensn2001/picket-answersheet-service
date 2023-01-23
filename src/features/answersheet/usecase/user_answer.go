@@ -29,6 +29,7 @@ func (u *usecase) UserAnswer(ctx context.Context, input answersheet_struct.UserA
 		CreatedAt:      input.Payload.CreatedAt,
 		UpdatedAt:      input.Payload.UpdatedAt,
 		PreviousAnswer: input.Payload.PreviousAnswer,
+		QuestionId:     input.Payload.QuestionId,
 	}
 
 	if err := u.repository.Create(ctx, &e); err != nil {

@@ -31,9 +31,9 @@ func (r *repository) GetLatestEventWithLimit(ctx context.Context, userId int, te
 	filter := bson.D{
 		{
 			"$and", bson.A{
-				bson.D{{"user_id", userId}},
-				bson.D{{"test_id", testId}},
-			},
+			bson.D{{"user_id", userId}},
+			bson.D{{"test_id", testId}},
+		},
 		},
 	}
 	opts := options.Find().SetLimit(int64(limit)).SetSort(bson.D{{"_id", -1}})
@@ -58,10 +58,10 @@ func (r *repository) GetLatestStartEvent(ctx context.Context, userId int, testId
 	filter := bson.D{
 		{
 			"$and", bson.A{
-				bson.D{{"user_id", userId}},
-				bson.D{{"test_id", testId}},
-				bson.D{{"event", entities.START}},
-			},
+			bson.D{{"user_id", userId}},
+			bson.D{{"test_id", testId}},
+			bson.D{{"event", entities.START}},
+		},
 		},
 	}
 	opts := options.FindOne().SetSort(bson.D{{"_id", -1}})
@@ -75,4 +75,47 @@ func (r *repository) GetLatestStartEvent(ctx context.Context, userId int, testId
 		return nil, err
 	}
 	return &result, nil
+}
+
+func (r *repository) FindAnswerByUserIdAndTestId(ctx context.Context, userId int, testId int, sessionId string) ([]entities.Event, error) {
+
+	type Field struct {
+		Id     int    `bson:"_id,omitempty"`
+		Answer string `bson:"answer,omitempty"`
+	}
+	filter := bson.A{
+		bson.M{"$match": bson.M{"user_id": userId, "test_id": testId, "event": entities.ANSWER, "session": sessionId}},
+		bson.M{"$group": bson.M{
+			"_id":    "$question_id",
+			"answer": bson.M{"$last": "$answer"},
+		}},
+	}
+	resp, err := r.mongo.Database("picket").Collection("events").Aggregate(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]Field, 0)
+
+	for resp.Next(ctx) {
+		var event Field
+		err := resp.Decode(&event)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, event)
+	}
+
+	data := make([]entities.Event, len(result))
+
+	for index, item := range result {
+		data[index] = entities.Event{
+			UserId:     userId,
+			TestId:     testId,
+			Event:      entities.ANSWER,
+			QuestionId: item.Id,
+			Answer:     item.Answer,
+		}
+	}
+
+	return data, nil
 }

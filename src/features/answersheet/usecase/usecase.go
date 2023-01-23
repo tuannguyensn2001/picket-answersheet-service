@@ -15,6 +15,7 @@ type IRepository interface {
 	GetLatestEvent(ctx context.Context, userId int, testId int) ([]entities.Event, error)
 	GetLatestStartEvent(ctx context.Context, userId int, testId int) (*entities.Event, error)
 	GetLatestEventWithLimit(ctx context.Context, userId int, testId int, limit int) ([]entities.Event, error)
+	FindAnswerByUserIdAndTestId(ctx context.Context, userId int, testId int, sessionId string) ([]entities.Event, error)
 }
 
 type usecase struct {
