@@ -162,7 +162,7 @@ func (t *transport) GetLatestStartTime(ctx context.Context, request *answersheet
 	}
 
 	resp := answersheetpb.GetLatestStartTimeResponse{
-		Message: "success",
+		Message: "success1",
 		Data:    timestamppb.New(*result),
 	}
 
