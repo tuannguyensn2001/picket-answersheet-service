@@ -157,13 +157,20 @@ func (t *transport) CheckUserDoingTest(ctx context.Context, request *answersheet
 
 func (t *transport) GetLatestStartTime(ctx context.Context, request *answersheetpb.GetLatestStartTimeRequest) (*answersheetpb.GetLatestStartTimeResponse, error) {
 	result, err := t.usecase.GetLatestStartTime(ctx, int(request.TestId), int(request.UserId))
+
 	if err != nil {
 		panic(err)
 	}
 
 	resp := answersheetpb.GetLatestStartTimeResponse{
 		Message: "success1",
-		Data:    timestamppb.New(*result),
+	}
+
+	if result != nil {
+		//zap.S().Info(result.Format("15:04:05 02/01/2006"))
+		resp.Data = timestamppb.New(*result)
+	} else {
+		resp.Data = nil
 	}
 
 	return &resp, nil

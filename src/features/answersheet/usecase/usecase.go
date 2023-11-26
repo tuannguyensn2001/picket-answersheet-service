@@ -49,6 +49,7 @@ func (u *usecase) StartTest(ctx context.Context, input answersheet_struct.StartT
 		Session:   session.String(),
 	}
 	err := u.repository.Create(ctx, &e)
+	zap.S().Info(input.Payload.CreatedAt.Format("15:04:05 02/01/2006"))
 	if err != nil {
 		return err
 	}

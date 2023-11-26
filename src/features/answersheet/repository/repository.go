@@ -17,6 +17,17 @@ func New(mongo *mongo.Client) *repository {
 }
 
 func (r *repository) Create(ctx context.Context, event *entities.Event) error {
+
+	//t, err := time.LoadLocation("Local")
+	//if err != nil {
+	//return err
+	//}
+	//createdAt := primitive.NewDateTimeFromTime(*event.CreatedAt)
+	//updatedAt := primitive.NewDateTimeFromTime(*event.UpdatedAt)
+	//event.CreatedAt = &createdAt
+	//event.UpdatedAt = &updatedAt
+
+	//zap.S().Info(createdAt.Format("15:04:05 02/01/2006"))
 	collection := r.mongo.Database("picket").Collection("events")
 
 	_, err := collection.InsertOne(ctx, event)
@@ -31,9 +42,9 @@ func (r *repository) GetLatestEventWithLimit(ctx context.Context, userId int, te
 	filter := bson.D{
 		{
 			"$and", bson.A{
-			bson.D{{"user_id", userId}},
-			bson.D{{"test_id", testId}},
-		},
+				bson.D{{"user_id", userId}},
+				bson.D{{"test_id", testId}},
+			},
 		},
 	}
 	opts := options.Find().SetLimit(int64(limit)).SetSort(bson.D{{"_id", -1}})
@@ -58,10 +69,10 @@ func (r *repository) GetLatestStartEvent(ctx context.Context, userId int, testId
 	filter := bson.D{
 		{
 			"$and", bson.A{
-			bson.D{{"user_id", userId}},
-			bson.D{{"test_id", testId}},
-			bson.D{{"event", entities.START}},
-		},
+				bson.D{{"user_id", userId}},
+				bson.D{{"test_id", testId}},
+				bson.D{{"event", entities.START}},
+			},
 		},
 	}
 	opts := options.FindOne().SetSort(bson.D{{"_id", -1}})

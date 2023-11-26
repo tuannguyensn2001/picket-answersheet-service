@@ -15,7 +15,8 @@ type Event struct {
 	PreviousAnswer string             `bson:"previous_answer,omitempty"`
 	CreatedAt      *time.Time         `bson:"created_at,omitempty"`
 	UpdatedAt      *time.Time         `bson:"updated_at,omitempty"`
-	QuestionId     int                `bson:"question_id,omitempty"`
+
+	QuestionId int `bson:"question_id,omitempty"`
 }
 
 const (
